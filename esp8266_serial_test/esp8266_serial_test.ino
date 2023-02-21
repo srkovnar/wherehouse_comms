@@ -15,11 +15,13 @@
 #include <ESP8266WiFiMulti.h>
 
 #define DOTDELAY 2000 //milliseconds
-#define SKIPWIFI 1 //0 = connect, 1 = don't connect
+#define SKIPWIFI 0 //0 = connect, 1 = don't connect
 
 #define MAX_SSID_LENGTH 32
 #define MAX_PASSWORD_LENGTH 64
 #define MAX_IP_LENGTH 16
+
+#define MAX_STRING_LENGTH 32 //For miscellaneous strings, such as dbname, root, etc.
 
 ESP8266WiFiMulti WiFiMulti;
 
@@ -28,11 +30,10 @@ char ssid[MAX_SSID_LENGTH] = "Wherehouse";
 //const char* password  = "12345678";
 char password[MAX_PASSWORD_LENGTH] = "12345678";
 
-//const char* server_name_data = "http://192.168.4.1/data";
 const char* http_tag = "http://";
 //const char* ip_addr = "192.168.4.1";
 //const char* ip_addr = "192.168.0.101";
-char ip_addr[MAX_IP_LENGTH] = "192.168.4.1";
+char ip_addr[MAX_IP_LENGTH] = "192.168.0.101";
 //const char* data_ext = "/data";
 
 const char* data_ext = "/demo/esp-data.php";
@@ -63,6 +64,7 @@ int status;
 // === COMMAND MATCH STRINGS ===
 const char modifier__get = '?';
 const char modifier__set = '=';
+const char modifier__exe = '!';
 
 const char* cmd__ip     = "WF+IP";
 const char* cmd__ssid   = "WF+SSID";
@@ -236,24 +238,54 @@ bool match_char_arrays(const char* str1, const char* str2) {
 
 int value_tool(int index, const char* cmd, char* value){
   /* this will be capable of setting and getting values, like the IP address*/
+  int k;
+  int n;
+  char buffer[MAX_STRING_LENGTH];
+  char arg[MAX_STRING_LENGTH];
+  
   if (strlen(cmd) <= index) {
     Serial.println("\tIt's not long enough, mate.");
     return 1;
   }
+
+  //Get argument from command
+  k = 0;
+  n = 0;
+  while (cmd[k] != '\0') {
+    n = k - index - 1;
+    if (k > index) { //Get everything after the ?, =, or !
+      arg[n] = cmd[k];
+      arg[n+1] = '\0'; //Make sure there's a null terminator at the end
+    }
+    k++;
+  }
+  //Serial.print("Argument: ");
+  //Serial.println(arg);
   
   if (cmd[index] == modifier__get) {
-    Serial.println("\tIt's a get command");
+    //Serial.println("\tIt's a get command");
+    Serial.println(value);
   }
   else if (cmd[index] == modifier__set) {
-    Serial.println("\tIt's a set command");
+    //Serial.println("\tIt's a set command");
+    strcpy(value, arg);
+  }
+  else if (cmd[index] == modifier__exe) {
+    //Serial.println("\t! modifier unavailable for this command");
+    Serial.println("NACK");
+    return 2;
+  }
+  else {
+    Serial.println("\tModifier unrecognized. Should be ?, =, or !");
+    return 3;
   }
 
   return 0;
 }
 
 int handler(const char* cmd) {
-  Serial.print("Received: ");
-  Serial.println(cmd);
+  //Serial.print("Received: ");
+  //Serial.println(cmd);
 
   const char* cmd_header = "WF+";
 
@@ -262,32 +294,42 @@ int handler(const char* cmd) {
   bool status;
 
   int temp;
+  int out;
 
   mismatch = compare_char_array(cmd_header, cmd);
-  Serial.print("Number of mismatches: ");
-  Serial.println(mismatch);
+  //Serial.print("Number of mismatches: ");
+  //Serial.println(mismatch);
 
   if (mismatch) {
     Serial.print("Invalid command; must start with ");
     Serial.println(cmd_header);
     return 1;
   }
+  /*
   else {
     Serial.println("Command has valid header.");
   }
+  */
 
   //temp = 0;
   temp = compare_char_array(cmd, cmd__ssid);
   if (temp == 0) {
-    Serial.println("Found an SSID command!");
+    //Serial.println("Found an SSID command!");
+    out = value_tool(7, cmd, ssid);
   }
-  // This vvv will all be replaced by the value tool later. Hopefully.
-  if (cmd[7] == '?') {
-    Serial.println("\tAnd it's a get command too.");
+
+  temp = compare_char_array(cmd, cmd__pass);
+  if (temp == 0) {
+    //Serial.println("Found a password command");
+    out = value_tool(5, cmd, password);
   }
-  else if (cmd[7] == '=') {
-    Serial.println("\tAnd it's a set command too.");
+
+  temp = compare_char_array(cmd, cmd__ip);
+  if (temp == 0) {
+    //Serial.println("Found an IP command");
+    out = value_tool(5, cmd, ip_addr);
   }
+
 
   return 0;
 }
