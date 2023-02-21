@@ -8,14 +8,15 @@ This repository contains the code used to test the Communications
 subsystem of the Wherehouse, Team 23's Spring 2023 ECE senior design
 project.
 
-## Setup and Requirements
+## Hardware Dependencies
 
-This code has been tested on Ai-Thinker's ESP8266 ESP-01 modules.
-It had been built and tested using the Arduino IDE.
+The code for ESP8266 devices has been tested on Ai-Thinker's ESP8266 ESP-01 modules.
 
-### Software dependencies
+## Software Dependencies
 
 Arduino IDE v2.0.0 or later
+- This version has been tested on Arduino v2.0.3
+- Certain libraries do not work on versions earlier than v2.0.0 for Linux
 
 ESP8266 Core for Arduino
 - ESP8266WiFi.h
@@ -26,14 +27,16 @@ WiFiClient.h
 
 ESPAsyncWebServer.h
 
-## Tested Software Versions
-
-Operating System >>> Ubuntu 22.04 LTS
-Arduino IDE >>> v2.0.3
-
 ## Repository Contents
 
-### Arduino Code
+All code for the ESP8266 is written in Arduino format (.ino).
+ESP8266 code files begin with 'esp8266_' followed by the name of the
+specific project.
+
+Due to the nature of the Arduino IDE, all code files must be kept in
+their own folder which shares the project name with the '.ino' file.
+
+### ESP8266 Code: Communication Testing
 
 esp8266_ap_test         -> Code for ESP8266 acting as Access Point
 esp8266_sta_test        -> Code for ESP8266 acting as Station
@@ -45,8 +48,11 @@ should be able to connect and display connection status over Serial lines.
 
 This code was last tested 2023-02-14.
 
-esp8266_ap_http_test    -> Code for ESP8266 acting as Access Point
-esp8266_sta_http_test   -> Code for ESP8266 acting as Station
+esp8266_ap_http_test
+- Code for ESP8266 acting as Access Point
+
+esp8266_sta_http_test
+- Code for ESP8266 acting as Station
 
 The above two code files are based on a tutorial by RandomNerdTutorials
 at https://randomnerdtutorials.com/esp8266-nodemcu-client-server-wi-fi/.
@@ -56,4 +62,14 @@ be able to receive data from the Access Point device by requesting from
 the /data URL.
 
 This code was last tested 2023-02-16.
+
+### ESP8266 Code: Handler Testing
+esp8266_serial_test
+- Code for testing Serial UART communication to and from the ESP8266
+- Includes a handler for interpreting UART commands
+- Serial commands can be sent from the host computer to the ESP8266 via
+the Arduino IDE serial monitor
+  - Baud rate: 115200
+  - In this way, the computer can mimic the behavior of the STM32 which will be
+    managing data in the final project
 

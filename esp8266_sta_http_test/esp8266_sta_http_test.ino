@@ -1,6 +1,9 @@
 /*
   Based partly on the Client code from :
   https://randomnerdtutorials.com/esp8266-nodemcu-client-server-wi-fi/
+
+  Also used
+  https://forum.arduino.cc/t/concatenate-char/376886/2
 */
 
 #include <ESP8266WiFi.h>
@@ -14,6 +17,12 @@ const char* ssid = "ESP8266";
 const char* password = "ESP8266Test";
 
 const char* server_name_data = "http://192.168.4.1/data";
+const char* http_tag = "http://";
+//const char* server_name_data = "http://";
+const char* ip_addr = "192.168.4.1";
+const char* data_ext = "/data";
+
+char buf[64]; // For dynamic address creation
 
 int i = 0;
 const int STOP = 10;
@@ -67,6 +76,12 @@ void setup() {
   Serial.println("");
   Serial.println("Connected to WiFi!");
 
+  // Testing dynamic creating of address.
+  strcat(buf, http_tag);
+  strcat(buf, ip_addr);
+  strcat(buf, data_ext);
+  Serial.println(buf);
+
   /*
   while (i < STOP) {
     Serial.print("Waiting... (");
@@ -90,7 +105,7 @@ void loop() {
 
   if (currentMillis - previousMillis >= interval) {
     if ((WiFiMulti.run() == WL_CONNECTED)) {
-      data = httpGETRequest(server_name_data);
+      data = httpGETRequest(buf);
       Serial.println("Data: " + data);
 
       //Do stuff here
