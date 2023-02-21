@@ -71,6 +71,6 @@ the Arduino IDE serial monitor
   - In this way, the computer can mimic the behavior of the STM32 which will be
     managing data in the final project
     
-**esp8266_router_test**: Test interactions between ESP8266 and web server via router
+**esp8266_sta_router_test**: Test interactions between ESP8266 station and web server via router
 
 
